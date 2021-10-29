@@ -2,15 +2,17 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"strings"
+
 	"github.com/alexflint/go-arg"
 	"github.com/sirupsen/logrus"
 	"github.com/stapelberg/coronaqr"
 	"github.com/stapelberg/coronaqr/trustlist/trustlistmirror"
-	"io/ioutil"
-	"os"
-	"strings"
 )
 
 var args struct {
@@ -56,7 +58,12 @@ func main() {
 	for idx, v := range decoded.Cert.VaccineRecords {
 		fmt.Printf("VR %d: C=%s,ID=%s,ISS=%s\n", idx, v.Country, v.CertificateID, v.Issuer)
 	}
-	fmt.Printf("KID: %s\n", base64.StdEncoding.EncodeToString(decoded.Kid))
+	kid := decoded.Kid
+	if len(kid) == 0 && decoded.SignedBy != nil {
+		hash := sha256.Sum256(decoded.SignedBy.Raw)
+		kid = hash[:8]
+	}
+	fmt.Printf("KID: %s\n", base64.StdEncoding.EncodeToString(kid))
 	fmt.Printf("Issued At: %+v\n", decoded.IssuedAt.Format(dateFormat))
 	if decoded.SignedBy != nil {
 		fmt.Printf("Signed By: %s (issued by: %s)\n", decoded.SignedBy.Subject, decoded.SignedBy.Issuer)
