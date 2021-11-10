@@ -58,6 +58,12 @@ func main() {
 	for idx, v := range decoded.Cert.VaccineRecords {
 		fmt.Printf("VR %d: C=%s,ID=%s,ISS=%s\n", idx, v.Country, v.CertificateID, v.Issuer)
 	}
+	for idx, r := range decoded.Cert.RecoveryRecords {
+		fmt.Printf("RR %d: C=%s,ID=%s,ISS=%s\n", idx, r.Country, r.CertificateID, r.Issuer)
+	}
+	for idx, t := range decoded.Cert.TestRecords {
+		fmt.Printf("TR %d: C=%s,ID=%s,ISS=%s\n", idx, t.Country, t.CertificateID, t.Issuer)
+	}
 	kid := decoded.Kid
 	if len(kid) == 0 && decoded.SignedBy != nil {
 		hash := sha256.Sum256(decoded.SignedBy.Raw)
